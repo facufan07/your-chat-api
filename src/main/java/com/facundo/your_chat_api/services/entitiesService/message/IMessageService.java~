@@ -1,0 +1,4 @@
+package com.facundo.your_chat_api.services.entitiesService.message;
+
+public interface IMessageService {
+}

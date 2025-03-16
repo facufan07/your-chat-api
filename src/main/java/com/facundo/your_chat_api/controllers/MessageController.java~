@@ -1,4 +1,0 @@
-package com.facundo.your_chat_api.controllers;
-
-public class MessageController {
-}

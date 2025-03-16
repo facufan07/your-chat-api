@@ -20,7 +20,7 @@ public class Message {
 
     private LocalDateTime creationDate;
 
-    private String type;
+    private Boolean type;
 
 
 }
