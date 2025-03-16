@@ -8,10 +8,10 @@ import com.facundo.your_chat_api.entities.User;
 import com.facundo.your_chat_api.exception.ObjectNotFoundException;
 import com.facundo.your_chat_api.exception.UnauthorizedException;
 import com.facundo.your_chat_api.repositories.ChatRepository;
+import com.facundo.your_chat_api.services.auth.IAuthService;
 import com.facundo.your_chat_api.services.entitiesService.user.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,15 +23,19 @@ public class ChatService implements IChatService {
 
     private final ChatRepository chatRepository;
 
+    private final IAuthService authService;
+
     public ChatService(IUserService userService,
-                       ChatRepository chatRepository) {
+                       ChatRepository chatRepository,
+                       IAuthService authService) {
         this.userService = userService;
         this.chatRepository = chatRepository;
+        this.authService = authService;
     }
 
     @Override
     public Page<ChatResponse> getAllChats(Pageable pageable) {
-        User user = this.getUser();
+        User user = this.authService.getUser();
 
         Page<ChatResponse> chats = this.chatRepository.findByUser(user, pageable);
 
@@ -40,7 +44,7 @@ public class ChatService implements IChatService {
 
     @Override
     public ChatResponse createChat(CreateChatRequest request) {
-        User user = this.getUser();
+        User user = this.authService.getUser();
 
         Chat chat = new Chat();
         chat.setName(request.getName());
@@ -60,7 +64,7 @@ public class ChatService implements IChatService {
 
     @Override
     public ChatResponse deleteChat(Long id) {
-        User user = this.getUser();
+        User user = this.authService.getUser();
 
         Chat chat = this.chatRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + id));
@@ -82,7 +86,7 @@ public class ChatService implements IChatService {
 
     @Override
     public ChatResponse updateChatName(UpdateChatRequest request) {
-        User user = this.getUser();
+        User user = this.authService.getUser();
 
         Chat chat = this.chatRepository.findById(request.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + request.getId()));
@@ -103,8 +107,4 @@ public class ChatService implements IChatService {
         return chatResponse;
     }
 
-    private User getUser() {
-        String mail = SecurityContextHolder.getContext().getAuthentication().getName();
-        return this.userService.findByMail(mail);
-    }
 }

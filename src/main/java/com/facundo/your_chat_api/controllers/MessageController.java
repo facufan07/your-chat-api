@@ -2,9 +2,13 @@ package com.facundo.your_chat_api.controllers;
 
 import com.facundo.your_chat_api.dto.MessageResponse;
 import com.facundo.your_chat_api.services.entitiesService.message.IMessageService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/message")
@@ -16,10 +20,17 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    public ResponseEntity<MessageResponse> getAllMessages() {
+    @PreAuthorize("hasAnyRole('USER')")
+    @GetMapping
+    public ResponseEntity<Page<MessageResponse>> getAllMessages(@RequestParam(defaultValue = "0") int page) {
 
-        MessageResponse messageResponse = this.messageService.getAllMessages();
+        Pageable pageable = PageRequest.of(
+                page,
+                10
+        );
 
-        return null;
+        Page<MessageResponse> messages = this.messageService.getAllMessages(pageable);
+
+        return ResponseEntity.ok(messageResponse);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -61,6 +62,12 @@ public class AuthService implements IAuthService {
         registerResponse.setToken(token);
 
         return registerResponse;
+    }
+
+    @Override
+    public User getUser() {
+        String mail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return this.userService.findByMail(mail);
     }
 
     private Map<String, Object> generateExtraClaims(User user) {
