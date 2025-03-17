@@ -1,8 +1,13 @@
 package com.facundo.your_chat_api.services.entitiesService.message;
 
+import com.facundo.your_chat_api.dto.CreateMessageRequest;
 import com.facundo.your_chat_api.dto.MessageResponse;
+import com.facundo.your_chat_api.entities.Chat;
 import com.facundo.your_chat_api.entities.Message;
 import com.facundo.your_chat_api.entities.User;
+import com.facundo.your_chat_api.exception.ObjectNotFoundException;
+import com.facundo.your_chat_api.exception.UnauthorizedException;
+import com.facundo.your_chat_api.repositories.ChatRepository;
 import com.facundo.your_chat_api.repositories.MessageRepository;
 import com.facundo.your_chat_api.services.auth.IAuthService;
 import org.springframework.data.domain.Page;
@@ -18,18 +23,52 @@ public class MessageService implements IMessageService {
 
     private final MessageRepository messageRepository;
 
+    private final ChatRepository chatRepository;
+
     public MessageService(IAuthService authService,
-                          MessageRepository messageRepository) {
+                          MessageRepository messageRepository,
+                          ChatRepository chatRepository) {
         this.authService = authService;
         this.messageRepository = messageRepository;
+        this.chatRepository = chatRepository;
     }
 
     @Override
-    public Page<MessageResponse> getAllMessages(Pageable pageable) {
+    public Page<MessageResponse> getAllMessages( Long chatId, Pageable pageable) {
         User user = this.authService.getUser();
+        Chat chat = this.chatRepository.findById(chatId)
+                .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + chatId));
+        if(!chat.getUser().equals(user)){
+            throw new UnauthorizedException("You are not authorized to access this chat");
+        }
 
-        Page<MessageResponse> messages = this.messageRepository.findByChat();
+        Page<MessageResponse> messages = this.messageRepository.findByChat(chat, pageable);
 
-        return null;
+        return messages;
+    }
+
+    @Override
+    public MessageResponse createMessage(CreateMessageRequest request) {
+        User user = this.authService.getUser();
+        Chat chat = this.chatRepository.findById(request.getChatId())
+                .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + request.getChatId()));
+
+        if(!chat.getUser().equals(user)){
+            throw new UnauthorizedException("You are not authorized to access this chat");
+        }
+        Message message = new Message();
+        message.setChat(chat);
+        message.setText(request.getMessage());
+        message.setType(request.getType());
+        message.setCreationDate(LocalDateTime.now());
+        Message messageBD = this.messageRepository.save(message);
+
+        MessageResponse messageResponse = new MessageResponse();
+        messageResponse.setId(messageBD.getId());
+        messageResponse.setText(messageBD.getText());
+        messageResponse.setType(messageBD.getType());
+        messageResponse.setCreationDate(messageBD.getCreationDate());
+
+        return messageResponse;
     }
 }
