@@ -58,4 +58,14 @@ public class JwtService {
     public String extractMail(String jwt) {
         return this.extractAllClaims(jwt).getSubject();
     }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().verifyWith(this.generateKey()).build().parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
 }

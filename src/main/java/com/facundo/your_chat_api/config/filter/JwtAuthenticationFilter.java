@@ -6,6 +6,7 @@ import com.facundo.your_chat_api.services.auth.JwtService;
 import com.facundo.your_chat_api.services.entitiesService.user.IUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,13 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String tokenWithBearer = request.getHeader("Authorization");
-
-        if(tokenWithBearer == null || !tokenWithBearer.startsWith("Bearer ") || !StringUtils.hasText(tokenWithBearer)){
-            throw new InvalidTokenException("Token not found");
-        }
-
-        String token = tokenWithBearer.substring(7);
+        String token = this.getToken(request);
         this.isExpired(token);
 
         String mail = this.jwtService.extractMail(token);
@@ -61,6 +56,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private String getToken(HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if("auth_token".equals(cookie.getName())){
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        String tokenWithBearer = request.getHeader("Authorization");
+
+        if(tokenWithBearer == null || !tokenWithBearer.startsWith("Bearer ") || !StringUtils.hasText(tokenWithBearer)){
+            throw new InvalidTokenException("Token not found");
+        }
+
+        return tokenWithBearer.substring(7);
     }
 
     private void isExpired(String token) {

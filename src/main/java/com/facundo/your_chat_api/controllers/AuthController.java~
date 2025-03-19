@@ -65,6 +65,7 @@ public class AuthController {
 
     @GetMapping("/isAuth")
     public ResponseEntity<Boolean> isAuth(HttpServletRequest request) {
+        System.out.println(Arrays.toString(request.getCookies()));
         Boolean isAuthenticated = this.authService.isAuthenticated(request);
 
         return ResponseEntity.ok(isAuthenticated);
