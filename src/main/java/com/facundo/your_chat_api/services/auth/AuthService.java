@@ -9,7 +9,6 @@ import com.facundo.your_chat_api.services.entitiesService.user.IUserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,13 +26,17 @@ public class AuthService implements IAuthService {
 
     private final IUserService userService;
 
+    private final CookieService cookieService;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
     public AuthService(JwtService jwtService,
-                       IUserService userService) {
+                       IUserService userService,
+                       CookieService cookieService) {
         this.jwtService = jwtService;
         this.userService = userService;
+        this.cookieService = cookieService;
     }
 
     @Override
@@ -76,27 +79,7 @@ public class AuthService implements IAuthService {
 
     @Override
     public Boolean isAuthenticated(HttpServletRequest request) {
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null){
-            for(Cookie cookie : cookies){
-                if("auth_token".equals(cookie.getName())){
-                    String token = cookie.getValue();
-                    Date now = new Date(System.currentTimeMillis());
-                    if(!this.jwtService.validateToken(token)){
-                        return false;
-                    }
-
-                    if(!this.jwtService.extractExpiration(token).after(now)){
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return this.cookieService.isAuthenticated(request);
     }
 
     private Map<String, Object> generateExtraClaims(User user) {

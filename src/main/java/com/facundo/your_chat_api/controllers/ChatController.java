@@ -15,9 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/chat")
+@CrossOrigin(
+        origins = "http://localhost:3000",
+        allowCredentials = "true"
+)
 public class ChatController {
 
     private final IChatService chatService;
+
 
     public ChatController(IChatService chatService) {
         this.chatService = chatService;
