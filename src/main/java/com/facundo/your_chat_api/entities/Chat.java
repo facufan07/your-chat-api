@@ -21,7 +21,7 @@ public class Chat {
 
     private LocalDateTime creationDate;
 
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
     private List<Message> messages;
 
     private LocalDateTime lastMessageDate;
