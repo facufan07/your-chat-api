@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/message")
+@CrossOrigin(
+        origins = {"http://localhost:3000", "https://your-chat-front-production.up.railway.app/"},
+        allowCredentials = "true"
+)
 public class MessageController {
 
     private final IMessageService messageService;
@@ -30,7 +34,7 @@ public class MessageController {
         Pageable pageable = PageRequest.of(
                 page,
                 10,
-                Sort.by(Sort.Order.desc("creationDate"))
+                Sort.by(Sort.Order.asc("id"))
         );
 
         Page<MessageResponse> messages = this.messageService.getAllMessages(chatId, pageable);

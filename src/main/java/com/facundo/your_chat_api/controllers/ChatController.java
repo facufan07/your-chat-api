@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/chat")
 @CrossOrigin(
-        origins = "http://localhost:3000",
+        origins = {"http://localhost:3000", "https://your-chat-front-production.up.railway.app/"},
         allowCredentials = "true"
 )
 public class ChatController {

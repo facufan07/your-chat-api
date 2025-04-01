@@ -8,9 +8,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -18,12 +17,15 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(
-        origins = "http://localhost:3000",
+        origins = {"http://localhost:3000", "https://your-chat-front-production.up.railway.app/"},
         allowCredentials = "true"
 )
 public class AuthController {
 
     private final IAuthService authService;
+
+    @Value("${environment}")
+    private String environment;
 
     public AuthController(IAuthService authService) {
         this.authService = authService;
@@ -32,35 +34,45 @@ public class AuthController {
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RegisterResponse> register(@RequestBody
                                                        @Valid
-                                                         RegisterRequest registerRequest) {
+                                                         RegisterRequest registerRequest,
+                                                      HttpServletResponse response) {
 
         RegisterResponse registerResponse = this.authService.register(registerRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
+        ResponseCookie cookie = ResponseCookie.from("auth_token",
+                        registerResponse.getToken())
+                .httpOnly(true)
+                .secure(environment.equals("production"))
+                .path("/")
+                .domain(environment.equals("production") ? ".railway.app" : "localhost")
+                .maxAge(86400)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(registerResponse);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Integer> login(@RequestBody RequestLogin requestLogin,
-                                                  HttpServletResponse response) {
+    public ResponseEntity<Integer> login(@RequestBody RequestLogin requestLogin) {
 
         RegisterResponse loginResponse = this.authService.login(requestLogin);
 
-        Cookie cookie = new Cookie("auth_token", loginResponse.getToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60);
-        cookie.setDomain("localhost");
+        ResponseCookie cookie = ResponseCookie.from("auth_token",
+                        loginResponse.getToken())
+                .httpOnly(true)
+                .secure(environment.equals("production"))
+                .path("/")
+                .domain(environment.equals("production") ? ".railway.app" : "localhost")
+                .maxAge(86400)
+                .sameSite("Lax")
+                .build();
 
 
-        response.addHeader(
-                "Set-Cookie", cookie.getName() + "=" + cookie.getValue() +
-                "; Path=" + cookie.getPath() +
-                "; HttpOnly; Max-Age=" + cookie.getMaxAge() +
-                "; SameSite=Lax");
-
-
-        return ResponseEntity.ok(response.getStatus());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(200);
     }
 
     @GetMapping("/isAuth")
@@ -68,5 +80,23 @@ public class AuthController {
         Boolean isAuthenticated = this.authService.isAuthenticated(request);
 
         return ResponseEntity.ok(isAuthenticated);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+
+        ResponseCookie cookie = ResponseCookie.from("auth_token", "")
+                .httpOnly(true)
+                .secure(environment.equals("production"))
+                .path("/")
+                .domain(environment.equals("production") ? ".railway.app" : "localhost")
+                .maxAge(86400)
+                .sameSite("Lax")
+                .build();
+
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 }
