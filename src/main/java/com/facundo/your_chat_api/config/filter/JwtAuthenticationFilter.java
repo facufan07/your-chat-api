@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getServletPath();
-        if (path.startsWith("/auth/")) {
+        if (path.startsWith("/auth/") && (path.endsWith("/login") || path.endsWith("/register"))) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -59,16 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getToken(HttpServletRequest request) {
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null){
-            for(Cookie cookie : cookies){
-                if("auth_token".equals(cookie.getName())){
-                    return cookie.getValue();
-                }
-            }
-        }
-
         String tokenWithBearer = request.getHeader("Authorization");
 
         if(tokenWithBearer == null || !tokenWithBearer.startsWith("Bearer ") || !StringUtils.hasText(tokenWithBearer)){
