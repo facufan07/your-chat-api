@@ -17,8 +17,7 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(
-        origins = {"http://localhost:3000", "https://your-chat-front-production.up.railway.app/", "https://your-chat-hazel.vercel.app/"},
-        allowCredentials = "true"
+        origins = {"http://localhost:3000", "https://your-chat-hazel.vercel.app"}
 )
 public class AuthController {
 

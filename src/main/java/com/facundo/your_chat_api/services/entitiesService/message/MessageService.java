@@ -38,7 +38,7 @@ public class MessageService implements IMessageService {
         User user = this.authService.getUser();
         Chat chat = this.chatRepository.findById(chatId)
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + chatId));
-        if(!chat.getUser().equals(user)){
+        if(!chat.getUser().getId().equals(user.getId())){
             throw new UnauthorizedException("You are not authorized to access this chat");
         }
 
@@ -53,7 +53,7 @@ public class MessageService implements IMessageService {
         Chat chat = this.chatRepository.findById(request.getChatId())
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + request.getChatId()));
 
-        if(!chat.getUser().equals(user)){
+        if(!chat.getUser().getId().equals(user.getId())){
             throw new UnauthorizedException("You are not authorized to access this chat");
         }
         Message message = new Message();

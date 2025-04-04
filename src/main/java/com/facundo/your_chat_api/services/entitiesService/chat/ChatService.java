@@ -69,7 +69,7 @@ public class ChatService implements IChatService {
         Chat chat = this.chatRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + id));
 
-        if(!chat.getUser().equals(user)){
+        if(!chat.getUser().getId().equals(user.getId())){
             throw new UnauthorizedException("You are not authorized to delete this chat");
         }
 
@@ -91,7 +91,7 @@ public class ChatService implements IChatService {
         Chat chat = this.chatRepository.findById(request.getId())
                 .orElseThrow(() -> new ObjectNotFoundException("Chat not found with id: " + request.getId()));
 
-        if(!chat.getUser().equals(user)){
+        if(!chat.getUser().getId().equals(user.getId())){
             throw new UnauthorizedException("You are not authorized to change the name of this chat");
         }
 
