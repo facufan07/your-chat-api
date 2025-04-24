@@ -41,10 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        if (path.startsWith("/oauth2/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String token = this.getToken(request);
         this.isExpired(token);

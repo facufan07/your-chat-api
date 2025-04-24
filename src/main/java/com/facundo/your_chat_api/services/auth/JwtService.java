@@ -22,7 +22,7 @@ public class JwtService {
     private String SECRET_KEY;
 
 
-    public String generateToken(User user, Map<String, Object> extraclaims) {
+    public String generateToken(User user) {
 
         Date issuedAt = new Date(System.currentTimeMillis());
         Date expiration = new Date((this.EXPIRATION_IN_MINUTES * 60 * 1000) + issuedAt.getTime());
@@ -33,7 +33,6 @@ public class JwtService {
                 .subject(user.getUsername())
                 .issuedAt(issuedAt)
                 .expiration(expiration)
-                .claims(extraclaims)
 
                 .signWith(this.generateKey(), Jwts.SIG.HS256)
                 .compact();

@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface IAuthService {
     RegisterResponse register(RegisterRequest registerRequest);
 
+    User registerOAuth2(String mail);
+
     RegisterResponse login(RequestLogin requestLogin);
 
     User getUser();

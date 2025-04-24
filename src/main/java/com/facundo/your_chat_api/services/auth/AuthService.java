@@ -5,9 +5,12 @@ import com.facundo.your_chat_api.dto.RegisterResponse;
 
 import com.facundo.your_chat_api.dto.RequestLogin;
 import com.facundo.your_chat_api.entities.User;
+import com.facundo.your_chat_api.repositories.UserRepository;
 import com.facundo.your_chat_api.services.entitiesService.user.IUserService;
+import com.facundo.your_chat_api.utils.Roles;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,11 +18,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService implements IAuthService {
 
     private final JwtService jwtService;
@@ -28,27 +33,31 @@ public class AuthService implements IAuthService {
 
     private final CookieService cookieService;
 
+    private final UserRepository userRepository;
+
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    public AuthService(JwtService jwtService,
-                       IUserService userService,
-                       CookieService cookieService) {
-        this.jwtService = jwtService;
-        this.userService = userService;
-        this.cookieService = cookieService;
-    }
 
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
 
         User user = this.userService.register(registerRequest);
-        String token = this.jwtService.generateToken(user, this.generateExtraClaims(user));
+        String token = this.jwtService.generateToken(user);
 
         RegisterResponse registerResponse = new RegisterResponse();
         registerResponse.setToken(token);
 
         return registerResponse;
+    }
+
+    @Override
+    public User registerOAuth2(String mail) {
+        User user = new User();
+        user.setMail(mail);
+        user.setRole(Roles.ROLE_USER.name());
+        user.setCreationDate(LocalDateTime.now());
+
+        return this.userRepository.save(user);
     }
 
     @Override
@@ -63,7 +72,7 @@ public class AuthService implements IAuthService {
 
         this.authenticationManager.authenticate(authentication);
 
-        String token = this.jwtService.generateToken(user, this.generateExtraClaims(user));
+        String token = this.jwtService.generateToken(user);
 
         RegisterResponse registerResponse = new RegisterResponse();
         registerResponse.setToken(token);
