@@ -3,8 +3,8 @@ services:
   your-chat-api:
     build: .
     container_name: your-chat-api
-    ports:
-      - "8080:8080"
+    expose:
+      - 8080
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
       - FRONTEND_URL=${FRONTEND_URL}
@@ -14,8 +14,17 @@ services:
       - SECRET=${SECRET}
       - URL=${URL}
       - USERNAME=root
+
+    networks:
+      - dokploy-network
+
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.your-chat-api.rule=Host(`yourchatapi-bkvwfv-b0772f-145-79-7-209.traefik.me`) || Host(`api.apiapp.shop`)"
-      - "traefik.http.services.your-chat-api.loadbalancer.server.port=8080"
+      - traefik.enable=true
+      - traefik.http.routers.your-chat-api.rule=Host(`yourchatapi-bkvwfv-b0772f-145-79-7-209.traefik.me`) || Host(`api.apiapp.shop`)
+      - traefik.http.routers.your-chat-api.entrypoints=web
+      - traefik.http.services.your-chat-api.loadbalancer.server.port=8080
     restart: always
+
+networks:
+  dokploy-network:
+    external: true
