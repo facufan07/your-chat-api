@@ -14,6 +14,7 @@ services:
       - SECRET=${SECRET}
       - URL=${URL}
       - USERNAME=root
+      - SERVER_ADDRESS=0.0.0.0
 
     networks:
       - dokploy-network
