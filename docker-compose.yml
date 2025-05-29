@@ -20,7 +20,7 @@ services:
 
     labels:
       - traefik.enable=true
-      - traefik.http.routers.your-chat-api.rule=Host(`yourchatapi-bkvwfv-b0772f-145-79-7-209.traefik.me`) || Host(`api.apiapp.shop`)
+      - traefik.http.routers.your-chat-api.rule=Host(`api.apiapp.shop`)
       - traefik.http.routers.your-chat-api.entrypoints=web
       - traefik.http.services.your-chat-api.loadbalancer.server.port=8080
     restart: always
