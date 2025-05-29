@@ -1,11 +1,8 @@
 version: '3.8'
 services:
   your-chat-api:
-    image: openjdk:21-jdk-slim
+    build: .
     container_name: your-chat-api
-    volumes:
-      - ./target/your-chat-api-0.0.1-SNAPSHOT.jar:/your_chat.jar
-    command: ["java", "-jar", "/your_chat.jar"]
     ports:
       - "8080:8080"
     environment:
