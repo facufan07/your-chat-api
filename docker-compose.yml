@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  your-chat-api:
+    image: openjdk:21-jdk-slim
+    container_name: your-chat-api
+    volumes:
+      - ./target/your-chat-api-0.0.1-SNAPSHOT.jar:/your_chat.jar
+    command: ["java", "-jar", "/your_chat.jar"]
+    ports:
+      - "8080:8080"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_SECRET=${GOOGLE_SECRET}
+      - PASSWORD=${PASSWORD}
+      - SECRET=${SECRET}
+      - URL=${URL}
+      - USERNAME=root
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.your-chat-api.rule=Host(`yourchatapi-bkvwfv-b0772f-145-79-7-209.traefik.me`)"
+      - "traefik.http.services.your-chat-api.loadbalancer.server.port=8080"
+    restart: always
