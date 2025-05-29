@@ -21,7 +21,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.your-chat-api.rule=Host(`api.apiapp.shop`)
-      - traefik.http.routers.your-chat-api.entrypoints=web
+      - traefik.http.routers.your-chat-api.entrypoints=websecure
+      - traefik.http.routers.your-chat-api.tls.certResolver=letsencrypt
       - traefik.http.services.your-chat-api.loadbalancer.server.port=8080
     restart: always
 
