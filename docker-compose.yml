@@ -13,7 +13,7 @@ services:
       - PASSWORD=${PASSWORD}
       - SECRET=${SECRET}
       - URL=${URL}
-      - USERNAME=root
+      - USERNAME=${USERNAME}
       - SERVER_ADDRESS=0.0.0.0
 
     networks:
